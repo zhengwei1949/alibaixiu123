@@ -49,8 +49,13 @@
           password:password
         },//如果不需要传，则注释掉 请求的参数，a=1&b=2或{a:1,b:2}或者jq中的serialize方法，或者formData收集
         success:function(result){//成功的回调函数
-          // ./ ../  ./index.html
-          location.href = 'index.html';
+          console.log(result)
+          //如果是管理员就跳转到后台首页页 如果是普通用户就跳转到前台首页
+          if(result.role == 'admin'){
+            location.href = '/admin/index.html';//后台首页
+          }else{
+            location.href = '/index.html';//前台首页
+          }
         },
         error:function(err){
           alert('用户名或密码写错了');

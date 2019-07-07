@@ -1,3 +1,9 @@
+<script src="/login/status"></script>
+<script>
+  if(isLogin == false) {
+    location.href = 'login.html';
+  }
+</script>
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -25,40 +31,9 @@
       <!-- <div class="alert alert-danger">
         <strong>错误！</strong>发生XXX错误
       </div> -->
-      <form class="form-horizontal">
-        <div class="form-group">
-          <label for="site_logo" class="col-sm-2 control-label">网站图标</label>
-          <div class="col-sm-6">
-            <label class="form-image">
-              <input type="file">
-              <img src="../assets/img/logo.png">
-              <i class="mask fa fa-upload"></i>
-            </label>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="col-sm-2 control-label">站点名称</label>
-          <div class="col-sm-6">
-            <input class="form-control" type="text" placeholder="站点名称">
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="col-sm-2 control-label">评论</label>
-          <div class="col-sm-6">
-            <div class="checkbox">
-              <label><input type="checkbox" checked>开启评论功能</label>
-            </div>
-            <div class="checkbox">
-              <label><input type="checkbox" checked>评论必须经人工批准</label>
-            </div>
-          </div>
-        </div>
-        <div class="form-group">
-          <div class="col-sm-offset-2 col-sm-6">
-            <button type="submit" class="btn btn-primary">保存设置</button>
-          </div>
-        </div>
-      </form>
+      <div id="formBox">
+        
+      </div>
     </div>
   </div>
 
@@ -101,5 +76,87 @@
 
   <script src="../assets/vendors/jquery/jquery.js"></script>
   <script src="../assets/vendors/bootstrap/js/bootstrap.js"></script>
+  <script type="text/html" id="tpl">
+    <form class="form-horizontal" id="settingForm">
+        <div class="form-group">
+          <label for="site_logo" class="col-sm-2 control-label">网站图标</label>
+          <div class="col-sm-6">
+            <label class="form-image">
+              <input type="file" id="myfile">
+                <img src="{{logo}}" id="preview">
+                  <input value="logo" type="hidden" name="logo" id="hiddenImg">
+                    <i class="mask fa fa-upload"></i>
+              </label>
+            </div>
+          </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label">站点名称</label>
+                <div class="col-sm-6">
+                  <input name="title" class="form-control" type="text" placeholder="站点名称" value="{{title}}">
+            </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-sm-2 control-label">评论</label>
+                  <div class="col-sm-6">
+                    <div class="checkbox">
+                      <label><input type="checkbox" {{comment==true?'checked':''}} name="comment" value="true">开启评论功能</label>
+              </div>
+                      <div class="checkbox">
+                        <label><input {{review==true?'checked':''}} type="checkbox"  name="review" value="true">评论必须经人工批准</label>
+              </div>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="col-sm-offset-2 col-sm-6">
+                        <button type="submit" class="btn btn-primary">保存设置</button>
+                      </div>
+                    </div>
+        </form>
+  </script>
+  <script src="../assets/vendors/art-template/template-web.js"></script>
+  <script>
+    $('#myfile').on('change',function(){
+      var formData = new FormData();
+      formData.append('avatar',this.files[0]);
+      $.ajax({
+        type:'post',//get或post
+        url:'/upload',//请求的地址
+        data:formData,
+        processData:false,
+        contentType:false,
+        success:function(result){//成功的回调函数
+          console.log(result)
+          $('#preview').attr('src',result[0].avatar);
+          $('#hiddenImg').val(result[0].avatar)
+        }
+      })
+    })
+
+
+    $('#settingForm').on('submit',function(){
+      console.log($(this).serialize());
+      $.ajax({
+        type:'post',//get或post
+        url:'/settings',//请求的地址
+        data: $(this).serialize(),
+        success:function(result){//成功的回调函数
+          alert('修改设置成功');
+        }
+      })
+      return false;
+    })
+
+
+    //当页面一打开的时候，显示之前上一次设置过的信息
+    $.ajax({
+      type:'get',//get或post
+      url:'/settings',//请求的地址
+      success:function(result){//成功的回调函数
+        console.log(result)
+        var html = template('tpl',result);
+        $('#formBox').html(html);
+      }
+    })
+  </script>
 </body>
 </html>
